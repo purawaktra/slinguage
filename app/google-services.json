@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "382110553060",
+    "project_id": "slinguage-bangkit-acedemy",
+    "storage_bucket": "slinguage-bangkit-acedemy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:382110553060:android:05d2794ee382f3dc05edf1",
+        "android_client_info": {
+          "package_name": "com.bangkit.slinguage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "382110553060-v20g7qlspvqgclj3fv53ue8cr5588qpq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bangkit.slinguage",
+            "certificate_hash": "6b5d59713c3a757150e8f05565887c59afab3299"
+          }
+        },
+        {
+          "client_id": "382110553060-hvl5urmqv4m875bafofjg3ujt8chrf54.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5Yy-Q2SU8Apg0TQLfmw5b2xt-Ec_9CdM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "382110553060-hvl5urmqv4m875bafofjg3ujt8chrf54.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.bangkit.slinguage">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SignLanguageRecognition">
+        <activity
+            android:name="com.bangkit.slinguage.ui.home.HomeActivity"
+            android:theme="@style/Theme.home.activity"
+            android:label="@string/title_activity_home" />
+        <activity
+            android:name="com.bangkit.slinguage.ui.register.RegisterActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar" />
+        <activity
+            android:name="com.bangkit.slinguage.ui.splass.SplassNoLoginActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar" />
+        <activity
+            android:name="com.bangkit.slinguage.ui.login.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/Theme.Design.Light.NoActionBar" />
+        <activity
+            android:name="com.bangkit.slinguage.ui.splass.SplassScreenActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
