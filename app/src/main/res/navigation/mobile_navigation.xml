@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.bangkit.slinguage.ui.home.ui.home.HomeFragment"
+        android:name="com.bangkit.slinguage.ui.home.learning.LearningFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.bangkit.slinguage.ui.home.ui.dashboard.DashboardFragment"
+        android:name="com.bangkit.slinguage.ui.home.translate.TranslateFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="com.bangkit.slinguage.ui.home.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:name="com.bangkit.slinguage.ui.home.profile.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>

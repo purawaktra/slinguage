@@ -1,10 +1,10 @@
-package com.bangkit.slinguage.ui.home.ui.dashboard
+package com.bangkit.slinguage.ui.home.translate
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class DashboardViewModel : ViewModel() {
+class TranslateViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
         value = "This is dashboard Fragment"
