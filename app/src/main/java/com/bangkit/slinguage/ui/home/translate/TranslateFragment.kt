@@ -121,8 +121,8 @@ class TranslateFragment : Fragment() {
                     }.addOnSuccessListener { objects ->
                         // Here, we get a list of objects which are detected.
                         for (it in objects) {
-                            if (binding.layout.childCount > 1) binding.layout.removeViewAt(1)
-                            if (it != null) {
+                            if (it != null && activity != null) {
+                                if (binding.layout.childCount > 1) binding.layout.removeViewAt(1)
                                 val element = Draw(
                                     requireActivity(),
                                     it.boundingBox,
