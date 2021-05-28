@@ -92,17 +92,22 @@ class LoginActivity : AppCompatActivity() {
                             it.data?.let { it1 -> updateUiWithUser(it1) }
                         }
                         is Resource.Error -> {
-
+                            login.visibility = View.VISIBLE
                             loading.visibility = View.GONE
+                            username.setText("")
+                            password.setText("")
                             showLoginFailed(it.message)
                         }
-                        is Resource.Loading -> loading.visibility = View.VISIBLE
+                        is Resource.Loading -> {
+                            loading.visibility = View.VISIBLE
+                            login.visibility = View.GONE
+                        }
                     }
 
                     setResult(Activity.RESULT_OK)
 
-                    //Complete and destroy login activity once successful
-                    finish()
+//                    //Complete and destroy login activity once successful
+//                    finish()
                 })
             }
         }
