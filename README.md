@@ -1,3 +1,5 @@
+[![<erikcontena>](https://circleci.com/gh/bakarbarakkabarakbar/slinguage.svg?style=shield)](https://circleci.com/gh/bakarbarakkabarakbar/slinguage)
+
 # slinguage
 Slinguage Official Repository
 
