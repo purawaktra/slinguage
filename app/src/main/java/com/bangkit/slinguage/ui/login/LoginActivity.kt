@@ -10,16 +10,13 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
 import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.Toast
 import com.bangkit.slinguage.R
-import com.bangkit.slinguage.data.login.Resource
-import com.bangkit.slinguage.data.login.model.User
+import com.bangkit.slinguage.data.source.Resource
+import com.bangkit.slinguage.data.source.model.User
 import com.bangkit.slinguage.databinding.ActivityLoginBinding
 import com.bangkit.slinguage.ui.home.HomeActivity
-import org.koin.android.ext.android.bind
 import org.koin.android.viewmodel.ext.android.viewModel
 
 

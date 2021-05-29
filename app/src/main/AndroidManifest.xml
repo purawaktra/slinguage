@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bangkit.slinguage">
+
     <uses-feature android:name="android.hardware.camera.any" />
+
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
-        android:allowBackup="true"
         android:name=".MyApplication"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SignLanguageRecognition">
+        <activity android:name=".ui.home.member.MemberActivity"></activity>
         <activity
-            android:name="com.bangkit.slinguage.ui.home.HomeActivity"
-            android:theme="@style/Theme.home.activity"
-            android:label="@string/title_activity_home" />
+            android:name=".ui.home.HomeActivity"
+            android:label="@string/title_activity_home"
+            android:theme="@style/Theme.home.activity" />
         <activity
-            android:name="com.bangkit.slinguage.ui.register.RegisterActivity"
+            android:name=".ui.register.RegisterActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar" />
         <activity
-            android:name="com.bangkit.slinguage.ui.splass.SplassNoLoginActivity"
+            android:name=".ui.splass.SplassNoLoginActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar" />
         <activity
-            android:name="com.bangkit.slinguage.ui.login.LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:label="@string/title_activity_login"
             android:theme="@style/Theme.Design.Light.NoActionBar" />
         <activity
-            android:name="com.bangkit.slinguage.ui.splass.SplassScreenActivity"
+            android:name=".ui.splass.SplassScreenActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

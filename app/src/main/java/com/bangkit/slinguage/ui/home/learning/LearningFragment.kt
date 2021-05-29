@@ -1,5 +1,6 @@
 package com.bangkit.slinguage.ui.home.learning
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,19 +8,31 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bangkit.slinguage.R
+import com.bangkit.slinguage.databinding.FragmentHomeBinding
+import com.bangkit.slinguage.ui.home.member.MemberActivity
 
 class LearningFragment : Fragment() {
 
     private lateinit var learningViewModel: LearningViewModel
+    private lateinit var binding: FragmentHomeBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        learningViewModel =
-            ViewModelProvider(this).get(LearningViewModel::class.java)
+        binding = FragmentHomeBinding.inflate(layoutInflater, container, false)
+        return binding.root
+    }
 
-        return inflater.inflate(R.layout.fragment_home, container, false)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.member.setOnClickListener {
+            Intent(requireActivity(), MemberActivity::class.java).apply {
+                startActivity(this)
+            }
+        }
     }
 }

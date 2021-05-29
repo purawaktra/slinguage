@@ -1,7 +1,7 @@
 package com.bangkit.slinguage.di
 
-import com.bangkit.slinguage.data.login.DataSource
-import com.bangkit.slinguage.data.login.Repository
+import com.bangkit.slinguage.data.source.DataSource
+import com.bangkit.slinguage.data.source.Repository
 import com.bangkit.slinguage.ui.home.profile.ProfileViewModel
 import com.bangkit.slinguage.ui.login.LoginViewModel
 import com.bangkit.slinguage.ui.register.RegisterViewModel

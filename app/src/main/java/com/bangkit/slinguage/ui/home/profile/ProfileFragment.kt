@@ -8,9 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.bangkit.slinguage.R
-import com.bangkit.slinguage.data.login.Resource
+import com.bangkit.slinguage.data.source.Resource
+import com.bangkit.slinguage.data.source.model.User
 import com.bangkit.slinguage.databinding.FragmentProfileBinding
 import com.bangkit.slinguage.ui.login.LoginActivity
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -49,5 +48,22 @@ class ProfileFragment : Fragment() {
                 }
             })
         }
+
+        profileViewModel.getUser().observe(viewLifecycleOwner, {
+            when (it) {
+                is Resource.Error -> Toast.makeText(context, "Logout Error", Toast.LENGTH_SHORT)
+                    .show()
+                is Resource.Loading -> Log.d("TAG", "user loading: ")
+                is Resource.Success -> {
+                    updateUi(it.data)
+                }
+            }
+        })
+
+    }
+
+    private fun updateUi(data: User?) {
+        binding.email.text = data?.email
+        binding.username.text = data?.username
     }
 }

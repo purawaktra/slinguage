@@ -1,6 +1,5 @@
 package com.bangkit.slinguage.ui.register
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -12,7 +11,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.bangkit.slinguage.data.login.Resource
+import com.bangkit.slinguage.data.source.Resource
 import com.bangkit.slinguage.databinding.ActivityRegisterBinding
 import com.bangkit.slinguage.ui.login.LoginActivity
 import org.koin.android.viewmodel.ext.android.viewModel

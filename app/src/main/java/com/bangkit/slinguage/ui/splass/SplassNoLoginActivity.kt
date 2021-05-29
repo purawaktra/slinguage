@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import com.bangkit.slinguage.data.login.Resource
+import com.bangkit.slinguage.data.source.Resource
 import com.bangkit.slinguage.databinding.ActivitySplassNoLoginBinding
 import com.bangkit.slinguage.ui.home.HomeActivity
 import com.bangkit.slinguage.ui.login.LoginActivity

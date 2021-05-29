@@ -75,15 +75,15 @@ class TranslateFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireActivity()))
 
         val localModel = LocalModel.Builder()
-            .setAssetFilePath("object_detection.tflite")
+            .setAssetFilePath("text_detector.tflite")
             .build()
 
         val customObjectDetectorOptions =
             CustomObjectDetectorOptions.Builder(localModel)
-                .setDetectorMode(CustomObjectDetectorOptions.SINGLE_IMAGE_MODE)
+                .setDetectorMode(CustomObjectDetectorOptions.STREAM_MODE)
                 .enableClassification()
                 .setClassificationConfidenceThreshold(0.5f)
-                .setMaxPerObjectLabelCount(1)
+                .setMaxPerObjectLabelCount(3)
                 .build()
 
 
@@ -116,12 +116,12 @@ class TranslateFragment : Fragment() {
                 objectDetector
                     .process(inputImage)
                     .addOnFailureListener {
-
+                        Log.d("TAG", "bindPreview: on failure ")
                         imageProxy.close()
                     }.addOnSuccessListener { objects ->
                         // Here, we get a list of objects which are detected.
                         for (it in objects) {
-                            if (it != null && activity != null) {
+                            if (activity != null) {
                                 if (binding.layout.childCount > 1) binding.layout.removeViewAt(1)
                                 val element = Draw(
                                     requireActivity(),

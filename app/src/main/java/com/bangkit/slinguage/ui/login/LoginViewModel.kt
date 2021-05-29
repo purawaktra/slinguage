@@ -5,9 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
 import com.bangkit.slinguage.R
-import com.bangkit.slinguage.data.login.Repository
-import com.bangkit.slinguage.data.login.Resource
-import com.bangkit.slinguage.data.login.model.User
+import com.bangkit.slinguage.data.source.Repository
+import com.bangkit.slinguage.data.source.Resource
+import com.bangkit.slinguage.data.source.model.User
 
 
 class LoginViewModel(private val repository: Repository) : ViewModel() {
