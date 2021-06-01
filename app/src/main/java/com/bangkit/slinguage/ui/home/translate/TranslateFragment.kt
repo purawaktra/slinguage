@@ -75,7 +75,7 @@ class TranslateFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireActivity()))
 
         val localModel = LocalModel.Builder()
-            .setAssetFilePath("text_detector.tflite")
+            .setAssetFilePath("ASL_classification.tflite")
             .build()
 
         val customObjectDetectorOptions =
@@ -120,10 +120,14 @@ class TranslateFragment : Fragment() {
                         imageProxy.close()
                     }.addOnSuccessListener { objects ->
                         // Here, we get a list of objects which are detected.
+                        Log.d("TAG", "bindPreview: on success ")
+
                         for (it in objects) {
                             if (activity != null) {
                                 if (binding.layout.childCount > 1) binding.layout.removeViewAt(1)
+                                it.trackingId
                                 val element = Draw(
+
                                     requireActivity(),
                                     it.boundingBox,
                                     it.labels.firstOrNull()?.text ?: "Undefined"

@@ -3,12 +3,19 @@ package com.bangkit.slinguage.data.source
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.bangkit.slinguage.data.source.model.Education
 import com.bangkit.slinguage.data.source.model.User
+import com.bangkit.slinguage.utils.JsonHelper
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 
 
-class DataSource(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) {
+class DataSource(
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
+    private val jsonHelper: JsonHelper
+) {
 
     companion object {
         private const val USER_COLLECTION = "Users"
@@ -62,9 +69,10 @@ class DataSource(private val auth: FirebaseAuth, private val firestore: Firebase
                     val result = User(
                         userId = id,
                         email = data[EMAIL_KEY] as String,
-                        username = data[USERNAME_KEY] as String)
+                        username = data[USERNAME_KEY] as String
+                    )
                     user.postValue(Resource.Success(result))
-                }.addOnFailureListener{
+                }.addOnFailureListener {
                     user.postValue(Resource.Error(it.localizedMessage))
                 }
         }
@@ -116,5 +124,33 @@ class DataSource(private val auth: FirebaseAuth, private val firestore: Firebase
         return login
     }
 
+    fun getEducation(): LiveData<Resource<List<Education>>> {
+        val education = MutableLiveData<Resource<List<Education>>>()
+//        education.postValue(Resource.Loading(null))
+
+        education.value = Resource.Success(jsonHelper.loadEducation())
+
+//        val mDatabase = FirebaseDatabase.getInstance().reference
+//        val mReference = mDatabase.child("education-resource")
+//
+//        mReference.get().addOnCompleteListener {
+//            if (it.isSuccessful) {
+//                val result = it.result
+//                Log.d("TAG", "getEducation: SUCCES atas")
+//                education.postValue(Resource.Success(result.children.map {snapshot ->
+//                    snapshot.getValue(Education::class.java)!!
+//                }))
+//
+//            } else {
+//                Log.d("TAG", "getEducation: ERROR atas")
+//
+//                education.postValue(Resource.Error(it.exception.toString()))
+//            }
+//        }
+
+
+        return education
+
+    }
 
 }

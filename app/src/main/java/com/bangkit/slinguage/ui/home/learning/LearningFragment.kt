@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bangkit.slinguage.R
 import com.bangkit.slinguage.databinding.FragmentHomeBinding
+import com.bangkit.slinguage.ui.home.education.EducationActivity
 import com.bangkit.slinguage.ui.home.member.MemberActivity
 
 class LearningFragment : Fragment() {
@@ -31,6 +32,12 @@ class LearningFragment : Fragment() {
 
         binding.member.setOnClickListener {
             Intent(requireActivity(), MemberActivity::class.java).apply {
+                startActivity(this)
+            }
+        }
+
+        binding.learning.setOnClickListener {
+            Intent(requireActivity(), EducationActivity::class.java).apply {
                 startActivity(this)
             }
         }

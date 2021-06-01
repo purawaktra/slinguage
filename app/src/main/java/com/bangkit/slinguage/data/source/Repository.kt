@@ -1,6 +1,7 @@
 package com.bangkit.slinguage.data.source
 
 import androidx.lifecycle.LiveData
+import com.bangkit.slinguage.data.source.model.Education
 import com.bangkit.slinguage.data.source.model.User
 
 /**
@@ -25,4 +26,7 @@ class Repository(private val dataSource: DataSource) {
 
     fun getUser():LiveData<Resource<User>> =
         dataSource.getDetailUser()
+
+    fun getEducation(): LiveData<Resource<List<Education>>> =
+        dataSource.getEducation()
 }

@@ -15,7 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SignLanguageRecognition">
-        <activity android:name=".ui.home.member.MemberActivity"></activity>
+        <activity android:name=".ui.home.education.EducationActivity"></activity>
+        <activity android:name=".ui.home.member.MemberActivity" />
         <activity
             android:name=".ui.home.HomeActivity"
             android:label="@string/title_activity_home"
