@@ -1,4 +1,4 @@
-These are step that you gonna follow to deploy yhe app in the right environment.
+These are step that you gonna follow to deploy the app in the right environment. The app will be deployed in the containerized environtment that needed to build before it can be deploy either directly on the virtual machines, or by doing a cloud build then upload it to cointainer registry to deploy it via kubernetes.
 
 1. First is you want to clone the project by using After that you can direct to go folder
     ```
