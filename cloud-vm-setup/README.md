@@ -21,20 +21,33 @@ These are step that you gonna follow to deploy the app in the right environment.
     ```
     this code will expose the port of the container which open on port 9090 to the port 8070 that will be serving through the vm IP's, this port is used for the application to send the images of the handsign and process it on the vm using the POST method.
     
-    
 Accessing Method
+
+By using postman application we can try the cloud accessibility. There are several API that we can use for the cloud.
     
-* To return the hello message from the container, this method can be use to check wheter the container is serving or not.
-    
-    ```
-    $ curl http:/[IP-ADDRESS]:8070/hello
-    ```
-* Using `POST` to sent the images to the container to predict the value, then sent them back as response
+* To return the hello message from the container, this method can be use to check wheter the container is serving or not. 
     
     ```
-    $ curl -X POST -F 'image=@[IMAGE-LOCATION]' http:/[IP-ADDRESS]:8070/predict
+    $ http://34.122.140.171/hello
+    ```
+* To using the models prediction, we need to upload the image first to the cloud then include it on the json file that can be sent to the API from the link below.
+    
+    ```
+    $ http://34.122.140.171/predict
     ```
     
-    you can change the `[IMAGE-LOCATION]` to your hand sign image file for example `image=@/home/user/Pictures/wallpaper.jpg` and also don't forget to attach `@` to the beginning of the file directory.
+    The json format that contain the url is like this.
+    
+    ```
+    {"url": "[httpsL//....jpg]"}
+    ```
+    
+    you can change the `[httpsL//....jpg]` to your hand sign image and the respons given by the clous is something like this.
+    
+    ```
+    {"result": "[LETTER]"}
+    ```
+    
+    the `[LETTER]` shown the prediction from the machine learning that compute on the cloud.
     
 
