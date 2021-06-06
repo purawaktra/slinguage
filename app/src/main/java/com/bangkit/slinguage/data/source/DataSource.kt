@@ -1,20 +1,35 @@
 package com.bangkit.slinguage.data.source
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.bangkit.slinguage.data.source.model.Education
 import com.bangkit.slinguage.data.source.model.User
+import com.bangkit.slinguage.data.source.remote.ApiService
+import com.bangkit.slinguage.data.source.remote.ImagePost
+import com.bangkit.slinguage.data.source.remote.Predict
 import com.bangkit.slinguage.utils.JsonHelper
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.ByteArrayOutputStream
 
 
 class DataSource(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-    private val jsonHelper: JsonHelper
+    private val jsonHelper: JsonHelper,
+    private val apiService: ApiService
 ) {
 
     companion object {
@@ -153,4 +168,108 @@ class DataSource(
 
     }
 
+
+    fun upImageDetect(fileName: String, uri: Uri): LiveData<Resource<String>> {
+
+
+
+        val urlDownload = MutableLiveData<Resource<String>>()
+        urlDownload.postValue(Resource.Loading(null))
+
+        val storage = Firebase.storage("gs://slinguage-bangkit-acedemy")
+
+        val storageRef = storage.reference
+        val imagesRef = storageRef.child("detect/$fileName")
+
+        val uploadTask  = imagesRef.putFile(uri)
+
+
+        val urlTask = uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                Log.d("TAG", "continueTask: ERROR")
+                task.exception?.let {
+                    throw it
+                }
+            }
+            imagesRef.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val downloadUri = task.result
+                urlDownload.postValue(Resource.Success(downloadUri.toString()))
+                Log.d("TAG", "dowloadUri: $downloadUri")
+            } else {
+                urlDownload.postValue(Resource.Error(task.exception.toString()))
+                Log.d("TAG", "get URL : ERROR")
+            }
+        }
+
+
+        return urlDownload
+
+    }
+
+
+    fun getPredict(url: String): LiveData<Resource<Predict>>{
+
+        val result = MutableLiveData<Resource<Predict>>()
+        result.postValue(Resource.Loading(null))
+        val body = ImagePost(url)
+
+        apiService.predict(body).enqueue(object : Callback<Predict> {
+            override fun onResponse(call: Call<Predict>, response: Response<Predict>) {
+
+                if (response.isSuccessful){
+                    val hasil = response.body()
+                    if (hasil != null){
+                        result.postValue(Resource.Success(hasil))
+                    }
+                }
+
+            }
+
+            override fun onFailure(call: Call<Predict>, t: Throwable) {
+                result.postValue(Resource.Error(t.toString()))
+            }
+
+        })
+        return result
+    }
+
+
+    fun uploadImage(fileName: String, bitmap: Bitmap): LiveData<Resource<String>> {
+        val urlDownload = MutableLiveData<Resource<String>>()
+        urlDownload.postValue(Resource.Loading(null))
+
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val data: ByteArray = baos.toByteArray()
+        val storage = Firebase.storage("gs://slinguage-bangkit-acedemy")
+        val storageRef = storage.reference
+        val imagesRef = storageRef.child("detect/$fileName")
+
+        val uploadTask = imagesRef.putBytes(data)
+
+
+        uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                Log.d("TAG", "continueTask: ERROR")
+                task.exception?.let {
+                    throw it
+                }
+            }
+            imagesRef.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val downloadUri = task.result
+                urlDownload.postValue(Resource.Success(downloadUri.toString()))
+                Log.d("TAG", "dowloadUri: $downloadUri")
+            } else {
+                urlDownload.postValue(Resource.Error(task.exception.toString()))
+                Log.d("TAG", "get URL : ERROR")
+            }
+        }
+
+
+        return urlDownload
+    }
 }

@@ -22,4 +22,8 @@
     <string name="empty_username">Empty Username</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="classifikasi">Classification Image</string>
+    <string name="result">result</string>
+    <string name="tv_take_photo">Take Photo</string>
+    <string name="detection">Detection Image</string>
 </resources>

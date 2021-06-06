@@ -1,5 +1,7 @@
 package com.bangkit.slinguage.data.source
 
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.bangkit.slinguage.data.source.model.Education
 import com.bangkit.slinguage.data.source.model.User
@@ -29,4 +31,13 @@ class Repository(private val dataSource: DataSource) {
 
     fun getEducation(): LiveData<Resource<List<Education>>> =
         dataSource.getEducation()
+
+
+    fun upFirebase(fileNam: String, uri: Uri) : LiveData<Resource<String>> =
+        dataSource.upImageDetect(fileNam, uri)
+
+    fun upImage(fileNam: String, bitmap: Bitmap) : LiveData<Resource<String>> =
+        dataSource.uploadImage(fileNam, bitmap)
+
+    fun getPredict(url: String) = dataSource.getPredict(url)
 }

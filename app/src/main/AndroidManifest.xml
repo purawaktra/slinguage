@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.bangkit.slinguage">
 
-    <uses-feature android:name="android.hardware.camera.any" />
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
 
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SignLanguageRecognition">
-        <activity android:name=".ui.home.education.EducationActivity"></activity>
+        android:theme="@style/Theme.SignLanguageRecognition"
+        tools:targetApi="m">
+        <activity android:name=".ui.home.education.EducationActivity" />
         <activity android:name=".ui.home.member.MemberActivity" />
         <activity
             android:name=".ui.home.HomeActivity"
@@ -40,6 +45,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.bangkit.slinguage.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

@@ -2,6 +2,7 @@ package com.bangkit.slinguage
 
 import android.app.Application
 import com.bangkit.slinguage.di.firebaseModule
+import com.bangkit.slinguage.di.networkModule
 import com.bangkit.slinguage.di.repositoryModule
 import com.bangkit.slinguage.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
@@ -20,7 +21,8 @@ open class MyApplication : Application() {
                 listOf(
                     firebaseModule,
                     repositoryModule,
-                    viewModelModule
+                    viewModelModule,
+                    networkModule
                 )
             )
         }

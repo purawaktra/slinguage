@@ -11,10 +11,11 @@ import com.bangkit.slinguage.R
 import com.bangkit.slinguage.databinding.FragmentHomeBinding
 import com.bangkit.slinguage.ui.home.education.EducationActivity
 import com.bangkit.slinguage.ui.home.member.MemberActivity
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class LearningFragment : Fragment() {
 
-    private lateinit var learningViewModel: LearningViewModel
+
     private lateinit var binding: FragmentHomeBinding
 
     override fun onCreateView(

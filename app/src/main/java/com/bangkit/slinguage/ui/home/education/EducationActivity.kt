@@ -38,7 +38,6 @@ class EducationActivity : AppCompatActivity() , ClickItemCallback{
                 is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
                 is Resource.Success -> {
                     binding.progressBar.visibility = View.GONE
-                    Toast.makeText(this, "data sum ${it.data?.size}", Toast.LENGTH_SHORT).show()
                     educationAdapter.setData(it.data)
                     educationAdapter.notifyDataSetChanged()
                 }

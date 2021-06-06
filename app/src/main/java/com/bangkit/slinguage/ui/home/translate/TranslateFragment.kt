@@ -1,43 +1,54 @@
 package com.bangkit.slinguage.ui.home.translate
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import android.graphics.Point
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.graphics.*
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
-import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleOwner
-import com.bangkit.slinguage.R
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
+import com.bangkit.slinguage.data.source.Resource
+
 import com.bangkit.slinguage.databinding.FragmentTranslateBinding
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.mlkit.common.model.LocalModel
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.objects.ObjectDetection
-import com.google.mlkit.vision.objects.ObjectDetector
-import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.task.vision.detector.Detection
+import org.tensorflow.lite.task.vision.detector.ObjectDetector
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.math.max
+import kotlin.math.min
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class TranslateFragment : Fragment() {
     companion object {
-        private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+        const val REQUEST_IMAGE_CAPTURE: Int = 1
+        private const val MAX_FONT_SIZE = 96F
     }
 
-    private lateinit var objectDetector: ObjectDetector
-    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private val viewModel: TranslateViewModel by viewModel()
     private lateinit var builder: StringBuilder
     private lateinit var binding: FragmentTranslateBinding
+    private lateinit var currentPhotoPath: String
+    private lateinit var fileName: String
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,137 +64,267 @@ class TranslateFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         builder = StringBuilder()
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
 
-            ActivityCompat.requestPermissions(
-                requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-            )
-
+        binding.captureImageFab.setOnClickListener {
+            try {
+                dispatchTakePictureIntent()
+            } catch (e: ActivityNotFoundException) {
+                Log.e("TAG", e.message.toString())
+            }
         }
     }
 
-    private fun startCamera() {
-        cameraProviderFuture = ProcessCameraProvider.getInstance(requireActivity())
-
-        cameraProviderFuture.addListener({
-            // get() is used to get the instance of the future.
-            val cameraProvider = cameraProviderFuture.get()
-            // Here, we will bind the preview
-            bindPreview(cameraProvider) // Call the function here
-        }, ContextCompat.getMainExecutor(requireActivity()))
-
-        val localModel = LocalModel.Builder()
-            .setAssetFilePath("ASL_classification.tflite")
-            .build()
-
-        val customObjectDetectorOptions =
-            CustomObjectDetectorOptions.Builder(localModel)
-                .setDetectorMode(CustomObjectDetectorOptions.STREAM_MODE)
-                .enableClassification()
-                .setClassificationConfidenceThreshold(0.5f)
-                .setMaxPerObjectLabelCount(3)
-                .build()
-
-
-        objectDetector =
-            ObjectDetection.getClient(customObjectDetectorOptions)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_IMAGE_CAPTURE &&
+            resultCode == Activity.RESULT_OK
+        ) {
+            setViewAndDetect(getCapturedImage())
+        }
     }
 
-    @SuppressLint("UnsafeOptInUsageError")
-    private fun bindPreview(cameraProvider: ProcessCameraProvider) {
-        val preview: Preview = Preview.Builder().build()
-        preview.setSurfaceProvider(binding.previewView.surfaceProvider)
+    private fun runObjectDetection(bitmap: Bitmap) {
+        val image = TensorImage.fromBitmap(bitmap)
 
-        val cameraSelector: CameraSelector = CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+        val options = ObjectDetector.ObjectDetectorOptions.builder()
+            .setMaxResults(5)
+            .setScoreThreshold(0.5f)
             .build()
+        val detector = ObjectDetector.createFromFileAndOptions(
+            requireActivity(), // the application context
+            "asl_v3.tflite", // must be same as the filename in assets folder
+            options
+        )
+
+        // Step 3: feed given image to the model and print the detection result
+        val results = detector.detect(image)
+        debugPrint(results)
+
+        val resultToDisplay = results.map {
+            // Get the top-1 category and craft the display text
+            val category = it.categories.first()
+            val text = "${category.label}, ${category.score.times(100).toInt()}%"
+
+            // Create a data object to display the detection result
+            DetectionResult(it.boundingBox, text)
+        }
+
+        // Draw the detection result on the bitmap and show it.
+        val imgWithResult = drawDetectionResult(bitmap, resultToDisplay)
+        requireActivity().runOnUiThread {
+            binding.imageView.setImageBitmap(imgWithResult)
+        }
 
 
-        val point = Point()
-//        val size = display?.getRealSize(point)
-        val imageAnalysis = ImageAnalysis.Builder()
-            .setTargetResolution(Size(point.x, point.y))
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .build()
+    }
 
-        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(requireActivity()), { imageProxy ->
-            val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-            val image = imageProxy.image
-            if (image != null) {
-                val inputImage = InputImage.fromMediaImage(image, rotationDegrees)
-                objectDetector
-                    .process(inputImage)
-                    .addOnFailureListener {
-                        Log.d("TAG", "bindPreview: on failure ")
-                        imageProxy.close()
-                    }.addOnSuccessListener { objects ->
-                        // Here, we get a list of objects which are detected.
-                        Log.d("TAG", "bindPreview: on success ")
+    /**
+     * setViewAndDetect(bitmap: Bitmap)
+     *      Set image to view and call object detection
+     */
+    private fun setViewAndDetect(bitmap: Bitmap) {
+        // Display capture image
+        binding.imageView.setImageBitmap(bitmap)
+        binding.tvPlaceholder.visibility = View.INVISIBLE
+        upImageDetect(fileName, bitmap)
+        // Run ODT and display result
+        // Note that we run this in the background thread to avoid blocking the app UI because
+        // TFLite object detection is a synchronised process.
+        lifecycleScope.launch(Dispatchers.Default) { runObjectDetection(bitmap) }
+    }
 
-                        for (it in objects) {
-                            if (activity != null) {
-                                if (binding.layout.childCount > 1) binding.layout.removeViewAt(1)
-                                it.trackingId
-                                val element = Draw(
+    private fun getCapturedImage(): Bitmap {
+        // Get the dimensions of the View
+        val targetW: Int = binding.imageView.width
+        val targetH: Int = binding.imageView.height
 
-                                    requireActivity(),
-                                    it.boundingBox,
-                                    it.labels.firstOrNull()?.text ?: "Undefined"
-                                )
-                                binding.layout.addView(element, 1)
-                                for (label in it.labels) {
-                                    val text = label.text
-                                    builder.append(text)
-                                    Log.d("TAG", "label: $text")
-                                    val confidence = label.confidence
+        val bmOptions = BitmapFactory.Options().apply {
+            // Get the dimensions of the bitmap
+            inJustDecodeBounds = true
 
+            BitmapFactory.decodeFile(currentPhotoPath, this)
 
-                                    Log.d("TAG", "confident: $confidence")
-                                }
-                            }
-                        }
-                        binding.tvResult.text = builder
+            val photoW: Int = outWidth
+            val photoH: Int = outHeight
 
-                        imageProxy.close()
-                    }
+            // Determine how much to scale down the image
+            val scaleFactor: Int = max(1, min(photoW / targetW, photoH / targetH))
+
+            // Decode the image file into a Bitmap sized to fill the View
+            inJustDecodeBounds = false
+            inSampleSize = scaleFactor
+            inMutable = true
+        }
+        val exifInterface = ExifInterface(currentPhotoPath)
+        val orientation = exifInterface.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED
+        )
+
+        val bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions)
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> {
+                rotateImage(bitmap, 90f)
             }
-        })
+            ExifInterface.ORIENTATION_ROTATE_180 -> {
+                rotateImage(bitmap, 180f)
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> {
+                rotateImage(bitmap, 270f)
+            }
+            else -> {
+                bitmap
+            }
+        }
+    }
 
-        cameraProvider.bindToLifecycle(
-            this as LifecycleOwner,
-            cameraSelector,
-            imageAnalysis,
-            preview
+    private fun rotateImage(source: Bitmap, angle: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height,
+            matrix, true
         )
     }
 
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        activity?.let { it1 ->
-            ContextCompat.checkSelfPermission(
-                it1, it
-            )
-        } == PackageManager.PERMISSION_GRANTED
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File? =
+            requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
     }
 
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults:
-        IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
-                Toast.makeText(
-                    context,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT
-                ).show()
+    /**
+     * dispatchTakePictureIntent():
+     *     Start the Camera app to take a photo.
+     */
+    @SuppressLint("QueryPermissionsNeeded")
+    private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(requireActivity().packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (e: IOException) {
+                    Log.e("TAG", e.message.toString())
+                    null
+                }
+                if (photoFile != null) {
+                    fileName = photoFile.name
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        requireActivity(),
+                        "com.bangkit.slinguage.fileprovider",
+                        it
+                    )
+
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                }
             }
         }
     }
 
+    /**
+     * drawDetectionResult(bitmap: Bitmap, detectionResults: List<DetectionResult>
+     *      Draw a box around each objects and show the object's name.
+     */
+    private fun drawDetectionResult(
+        bitmap: Bitmap,
+        detectionResults: List<DetectionResult>
+    ): Bitmap {
+        val outputBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(outputBitmap)
+        val pen = Paint()
+        pen.textAlign = Paint.Align.LEFT
+
+        detectionResults.forEach {
+            // draw bounding box
+            pen.color = Color.RED
+            pen.strokeWidth = 8F
+            pen.style = Paint.Style.STROKE
+            val box = it.boundingBox
+            canvas.drawRect(box, pen)
+
+
+            val tagSize = Rect(0, 0, 0, 0)
+
+            // calculate the right font size
+            pen.style = Paint.Style.FILL_AND_STROKE
+            pen.color = Color.YELLOW
+            pen.strokeWidth = 2F
+
+            pen.textSize = MAX_FONT_SIZE
+            pen.getTextBounds(it.text, 0, it.text.length, tagSize)
+            val fontSize: Float = pen.textSize * box.width() / tagSize.width()
+
+            // adjust the font size so texts are inside the bounding box
+            if (fontSize < pen.textSize) pen.textSize = fontSize
+
+            var margin = (box.width() - tagSize.width()) / 2.0F
+            if (margin < 0F) margin = 0F
+            canvas.drawText(
+                it.text, box.left + margin,
+                box.top + tagSize.height().times(1F), pen
+            )
+        }
+        return outputBitmap
+    }
+
+    private fun debugPrint(results: List<Detection>) {
+        for ((i, obj) in results.withIndex()) {
+            val box = obj.boundingBox
+
+            Log.d("TAG", "Detected object: ${i} ")
+            Log.d("TAG", "  boundingBox: (${box.left}, ${box.top}) - (${box.right},${box.bottom})")
+
+            for ((j, category) in obj.categories.withIndex()) {
+                Log.d("TAG", "    Label $j: ${category.label}")
+                val confidence: Int = category.score.times(100).toInt()
+                Log.d("TAG", "    Confidence: ${confidence}%")
+            }
+        }
+    }
+
+
+    private fun upImageDetect(fileName: String, uri: Bitmap) {
+        viewModel.upFirebase(fileName, uri).observe(viewLifecycleOwner, {
+            when (it) {
+                is Resource.Error -> Log.d("TAG fragment", "up firebase error: ")
+                is Resource.Loading -> Log.d("TAG fragment", "up firebase loding: ")
+                is Resource.Success -> {
+                    Log.d("TAG fragment", "up firebase success: ")
+                    it.data?.let { it1 -> getDetectResult(it1) }
+                }
+            }
+        })
+
+    }
+
+    private fun getDetectResult(url: String){
+        viewModel.getPredict(url).observe(viewLifecycleOwner, {
+            when (it) {
+                is Resource.Error -> Log.d("TAG fragment", "up predict error: ")
+                is Resource.Loading -> Log.d("TAG fragment", "up predict loding: ")
+                is Resource.Success -> {
+                    Log.d("TAG fragment", "up predict success: ")
+                    binding.tvDescription.text = it.data?.result ?: "error"
+
+                }
+            }
+        })
+    }
 }
