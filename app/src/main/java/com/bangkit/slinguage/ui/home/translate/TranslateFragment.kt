@@ -13,20 +13,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.bangkit.slinguage.data.source.Resource
-
 import com.bangkit.slinguage.databinding.FragmentTranslateBinding
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.tensorflow.lite.support.image.TensorImage
+import org.koin.android.viewmodel.ext.android.viewModel
+import org.tensorflow.lite.support.image.TensorImage.fromBitmap
 import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
 import java.io.File
@@ -35,7 +31,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
-import org.koin.android.viewmodel.ext.android.viewModel
 
 class TranslateFragment : Fragment() {
     companion object {
@@ -84,7 +79,7 @@ class TranslateFragment : Fragment() {
     }
 
     private fun runObjectDetection(bitmap: Bitmap) {
-        val image = TensorImage.fromBitmap(bitmap)
+        val image = fromBitmap(bitmap)
 
         val options = ObjectDetector.ObjectDetectorOptions.builder()
             .setMaxResults(5)
@@ -314,7 +309,7 @@ class TranslateFragment : Fragment() {
 
     }
 
-    private fun getDetectResult(url: String){
+    private fun getDetectResult(url: String) {
         viewModel.getPredict(url).observe(viewLifecycleOwner, {
             when (it) {
                 is Resource.Error -> Log.d("TAG fragment", "up predict error: ")
