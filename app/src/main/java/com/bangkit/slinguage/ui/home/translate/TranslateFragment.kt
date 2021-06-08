@@ -14,9 +14,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.bangkit.slinguage.R
 import com.bangkit.slinguage.data.source.Resource
 import com.bangkit.slinguage.databinding.FragmentTranslateBinding
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +69,14 @@ class TranslateFragment : Fragment() {
                 Log.e("TAG", e.message.toString())
             }
         }
+//        if (binding.clearText.isVisible){
+        binding.clearText.setOnClickListener {
+            builder.clear()
+            binding.tvDescription.text = ""
+            binding.captureImageFab.text = getString(R.string.tv_take_photo)
+            binding.clearText.visibility = View.INVISIBLE
+        }
+//        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -75,6 +85,7 @@ class TranslateFragment : Fragment() {
             resultCode == Activity.RESULT_OK
         ) {
             setViewAndDetect(getCapturedImage())
+            binding.captureImageFab.text = "Add more"
         }
     }
 
@@ -109,8 +120,11 @@ class TranslateFragment : Fragment() {
         requireActivity().runOnUiThread {
             binding.imageView.setImageBitmap(imgWithResult)
         }
+    }
 
-
+    override fun onResume() {
+        super.onResume()
+        Log.d("ON_RESUME", binding.tvDescription.text.toString())
     }
 
     /**
@@ -119,6 +133,7 @@ class TranslateFragment : Fragment() {
      */
     private fun setViewAndDetect(bitmap: Bitmap) {
         // Display capture image
+        binding.imageView.isVisible = true
         binding.imageView.setImageBitmap(bitmap)
         binding.tvPlaceholder.visibility = View.INVISIBLE
         upImageDetect(fileName, bitmap)
@@ -157,6 +172,7 @@ class TranslateFragment : Fragment() {
         )
 
         val bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions)
+
         return when (orientation) {
             ExifInterface.ORIENTATION_ROTATE_90 -> {
                 rotateImage(bitmap, 90f)
@@ -306,7 +322,6 @@ class TranslateFragment : Fragment() {
                 }
             }
         })
-
     }
 
     private fun getDetectResult(url: String) {
@@ -316,8 +331,13 @@ class TranslateFragment : Fragment() {
                 is Resource.Loading -> Log.d("TAG fragment", "up predict loding: ")
                 is Resource.Success -> {
                     Log.d("TAG fragment", "up predict success: ")
-                    binding.tvDescription.text = it.data?.result ?: "error"
 
+                    builder.append(it.data?.result ?: "error")
+                    binding.tvDescription.text = builder.toString()
+                    if (!(builder.isNullOrEmpty())) {
+                        binding.clearText.visibility = View.VISIBLE
+                    } else
+                        binding.clearText.visibility = View.INVISIBLE
                 }
             }
         })
